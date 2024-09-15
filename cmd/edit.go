@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/BurntSushi/toml"
 	"github.com/knqyf263/pet/config"
+	"github.com/knqyf263/pet/snippet"
 	petSync "github.com/knqyf263/pet/sync"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -51,9 +53,20 @@ func edit(cmd *cobra.Command, args []string) (err error) {
 	// file content after editing
 	after := fileContent(snippetFile)
 
-	// return if same file content
-	if before == after {
-		return nil
+	var afterSnippets snippet.Snippets
+	err = toml.Unmarshal([]byte(after), &afterSnippets)
+	if err != nil {
+		return err
+	}
+
+	// something changed so just delete and write a new file
+	if before != after {
+		if err = os.Remove(snippetFile); err != nil {
+			return err
+		}
+		if err = afterSnippets.Save(); err != nil {
+			return err
+		}
 	}
 
 	if config.Conf.Gist.AutoSync {

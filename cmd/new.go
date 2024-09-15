@@ -151,7 +151,8 @@ func createAndEditSnippet(newSnippet snippet.SnippetInfo, snippets snippet.Snipp
 	}
 
 	// Open snippet for editing
-	snippetFile := config.Conf.General.SnippetFile
+	// snippetFile := config.Conf.General.SnippetFile
+	snippetFile := newSnippet.Filename
 	editor := config.Conf.General.Editor
 	err := editFile(editor, snippetFile, startLine)
 	if err != nil {
@@ -169,7 +170,10 @@ func countSnippetLines() int {
 	// Count lines in snippet file
 	f, err := os.Open(config.Conf.General.SnippetFile)
 	if err != nil {
-		panic("Error reading snippet file")
+		if errors.Is(err, os.ErrNotExist) {
+			return 0
+		}
+		// panic("Error reading snippet file")
 	}
 	lineCount, err := CountLines(f)
 	if err != nil {
@@ -185,10 +189,11 @@ func new(cmd *cobra.Command, args []string) (err error) {
 	var description string
 	var tags []string
 
-	var snippets snippet.Snippets
-	if err := snippets.Load(); err != nil {
-		return err
-	}
+	// var snippets snippet.Snippets = []
+	// if err := snippets.Load(); err != nil {
+	// 	return err
+	// }
+	var snippets snippet.Snippets = snippet.Snippets{}
 
 	lineCount := countSnippetLines()
 
@@ -243,6 +248,8 @@ func new(cmd *cobra.Command, args []string) (err error) {
 
 	if config.Conf.General.SnippetFile != "" {
 		filename = config.Conf.General.SnippetFile
+	} else {
+		filename = ""
 	}
 
 	newSnippet := snippet.SnippetInfo{

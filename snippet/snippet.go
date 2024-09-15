@@ -12,6 +12,8 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
+const filenameLength = 30
+
 type Snippets struct {
 	Snippets []SnippetInfo
 }
@@ -77,19 +79,29 @@ if you only want to provide snippetdirs instead`,
 	return nil
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
 // Save saves the snippets to toml file.
 func (snippets *Snippets) Save() error {
 	var snippetFile string
 	var newSnippets Snippets
 	for _, snippet := range snippets.Snippets {
 		if snippet.Filename == "" {
-			snippetFile = config.Conf.General.SnippetDirs[0] + fmt.Sprintf("%s.toml", strings.ToLower(sanitize.BaseName(snippet.Description)))
+			length := min(filenameLength, len(snippet.Description))
+			snippetFile = config.Conf.General.SnippetDirs[0] + "/" + fmt.Sprintf("%s.toml", strings.ToLower(sanitize.BaseName(snippet.Description[:length])))
 			newSnippets.Snippets = append(newSnippets.Snippets, snippet)
 		} else if snippet.Filename == config.Conf.General.SnippetFile {
 			snippetFile = config.Conf.General.SnippetFile
 			newSnippets.Snippets = append(newSnippets.Snippets, snippet)
 		}
 	}
+
 	f, err := os.Create(snippetFile)
 	if err != nil {
 		return fmt.Errorf("failed to save snippet file. err: %s", err)
