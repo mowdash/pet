@@ -2,6 +2,7 @@ package snippet
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -100,6 +101,12 @@ func (snippets *Snippets) Save() error {
 			snippetFile = config.Conf.General.SnippetFile
 			newSnippets.Snippets = append(newSnippets.Snippets, snippet)
 		}
+	}
+
+	_, err := os.Stat(snippetFile)
+	if err == nil {
+		// file exists
+		return errors.New("snippet file already exists...use a different Description")
 	}
 
 	f, err := os.Create(snippetFile)

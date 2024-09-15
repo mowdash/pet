@@ -59,12 +59,12 @@ func edit(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	// something changed so just delete and write a new file
+	// something changed so just write a new file and delete the old one
 	if before != after {
-		if err = os.Remove(snippetFile); err != nil {
+		if err = afterSnippets.Save(); err != nil {
 			return err
 		}
-		if err = afterSnippets.Save(); err != nil {
+		if err = os.Remove(snippetFile); err != nil {
 			return err
 		}
 	}
