@@ -112,6 +112,8 @@ func (snippets *Snippets) Save() error {
 	f, err := os.Create(snippetFile)
 	if err != nil {
 		return fmt.Errorf("failed to save snippet file. err: %s", err)
+	} else {
+		fmt.Println("saved", snippetFile)
 	}
 
 	defer f.Close()
